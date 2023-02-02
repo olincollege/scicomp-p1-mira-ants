@@ -14,13 +14,13 @@ class Ant:
         return random.random() < pher_level
 
     def get_neighbors(self):
-        location_array = np.zeros_like(self.space.space)
+        location_array = np.zeros_like(self.space.array)
         location_array[self.location] = 1
         neighbors = convolve2d(location_array, self.neighbor_kernel).nonzero()
         return list(zip(neighbors[0],neighbors[1]))
 
     def choose_most_phermones_neighbor(self):
-        phermone_levels = [(l,self.space.space[l]) for l in self.get_neighbors()]
+        phermone_levels = [(l,self.space.array[l]) for l in self.get_neighbors()]
         phermone_levels.sort(key=lambda level:level[1],reverse=True)
         print(phermone_levels)
         return phermone_levels[0][0]
