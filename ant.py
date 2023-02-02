@@ -7,6 +7,7 @@ class Ant:
         self.following = False
         self.space = space
         self.neighbor_kernel = np.ones((3,3))
+        self.neighbor_kernel[1,1] = 0
 
     def choose_phermone(self):
         pher_level = self.space[self.location]
@@ -19,8 +20,11 @@ class Ant:
         return list(zip(neighbors[0],neighbors[1]))
 
     def choose_most_phermones_neighbor(self):
-        phermone_levels = [(l,self.space.space[l]) for l in self.get_neighbors]
-        
+        phermone_levels = [(l,self.space.space[l]) for l in self.get_neighbors()]
+        phermone_levels.sort(key=lambda level:level[1],reverse=True)
+        print(phermone_levels)
+        return phermone_levels[0][0]
+
 
     def step(self):
         if(self.following):
