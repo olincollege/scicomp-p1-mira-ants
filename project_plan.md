@@ -19,8 +19,8 @@
 
 1. Please pick a computing skill to focus on during this project. For example, on this project, you could focus on timing (making it as fast as possible) or refactoring (very elegant code) or model accuracy, or pushing the limits of computing during the timeframe, or usability, or something else. You may practice the same skill multiple times. Share why you picked this skill, and exactly how you plan to practice it. Which tasks above will allow you to practice this skill?
 
-    I plan to focus on refactoring, usability, and documentation. I picked these skills because I forgot to test out of SoftDes, and I'm hoping to use this project as my test-out project. I plan to practice these skills by making drafts of my code and progressively refactoring and documenting the purpose of all the code for usability. Secondarily, I also plan to work on model accuracy while trying to match the paper's results as closely as possible.
+    I plan to focus on writing clean and well documented code. I picked these skills because I forgot to test out of SoftDes, and I'm hoping to use this project as my test-out project.
 
 1. How will you benchmark your model? What result will your model have that is directly comparable to real world data? In other words, how will we know how accurate your model is?
 
-    I plan to attempt to replicate the model shown in the ants paper as closely as possible. I will make analogous graphs and (hopefully) show that my model produces similar results.
+    I plan to attempt to replicate the model as described in the paper. I will use the first turning algorithm, and I will not be sweeping variables. I will benchmark the model by achieving an output that matches the paper's result for figures with similar parameters. I will not measure that similarity mathematically, and my "benchmark" will be asking my peers whether it looks about the same. 
