@@ -23,7 +23,8 @@ class Ant:
 
         # start in a random direction
         self.direction = np.random.randint(0,8)
-        self.neighbor_kernel = np.int_(np.ones((3,3)))
+        # self.direction = 5
+        self.neighbor_kernel = np.ones((3,3))
         self.neighbor_kernel[1,1] = 0
         # print(self.neighbor_kernel)
 
@@ -47,7 +48,7 @@ class Ant:
         location_array = np.zeros_like(self.sim.array)
         # print(self.location)
         location_array[*self.location] = 1
-        neighbors = convolve2d(location_array, self.neighbor_kernel).nonzero()
+        neighbors = convolve2d(location_array, self.neighbor_kernel, mode='same').nonzero()
         return list(zip(neighbors[0],neighbors[1]))
 
     """Return the list of neighbors, ordered by phermones.
@@ -139,12 +140,27 @@ class Ant:
                 # begin following
                 self.following = True
                 # self.move_forward()
+                # print(self.get_phermones_per_neighbor(self.get_neighbors()))
                 # print(self.location)
-                best_neighbor = self.get_phermones_per_neighbor(self.get_neighbors())[0][0]
+                nbr_phers = self.get_phermones_per_neighbor(self.get_neighbors())
                 # print(best_neighbor)
-                # print(np.add(np.subtract(self.location,best_neighbor),1))
-                self.direction = np.where(self.directions == np.add(np.subtract(self.location,best_neighbor),1))[0][0]
-                self.move_forward()
+                # print(np.subtract(self.location,best_neighbor))
+                # self.direction = np.where(self.directions == np.subtract(self.location,best_neighbor))[0][0]
+                # dirs = [np.where(self.directions == np.subtract(self.location,i[0])) for i in nbr_phers]
+                nbrs = [i[0] for i in nbr_phers]
+                d_coords = list([np.subtract(self.location, n) for n in nbrs])
+                # print(d_coords)
+
+                dirs = []
+                for d in d_coords:
+                    for i in range(len(self.directions)):
+                        j = self.directions[i]
+                        if(d[0]==j[0] and d[1] == j[1]):
+                            dirs.append(i)
+                phers = [i[1] for i in nbr_phers]
+                phers = phers/np.sum(phers)
+                self.direction = np.random.choice(dirs, p=phers)
+                # self.move_forward()
                 # print(self.direction)
             else:
                 # continue exploring
@@ -157,5 +173,6 @@ class Ant:
             self.sim.remove_ant(self)
 
         self.sim.deposit_phermone(self.location)
+        # print(self.direction)
 
         return self.location
