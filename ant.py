@@ -53,9 +53,9 @@ class Ant:
 
     """Return the neighbor with the highest number of phermones
 
-    returns: a 2-length tuple
+    returns: a list of 2-length tuples of 2-length location tuples and corresponding phermone levels, sorted with highest level first
     """
-    def choose_most_phermones_neighbor(self, possible_locs):
+    def get_phermones_per_neighbor(self, possible_locs):
         # print(self.get_neighbors())
         phermone_levels = []
         for l in possible_locs:
@@ -67,7 +67,7 @@ class Ant:
         phermone_levels.sort(key=lambda level:level[1],reverse=True)
         # print(phermone_levels[0][0])
         # print(phermone_levels)
-        return phermone_levels[0][0]
+        return phermone_levels
 
     """Move forward (toward current direction)
     """
@@ -81,10 +81,23 @@ class Ant:
     def move_follow(self):
         new_location = np.add(self.location, self.directions[self.direction])
         if(self.sim.array[*new_location] < self.trail_level):
-            possible_directions = (self.directions[(self.direction-1) % 8],self.directions[(self.direction + 1) % 8])
+            possible_directions = (self.directions[self.direction], self.directions[(self.direction-1) % 8],self.directions[(self.direction + 1) % 8])
             # print(possible_directions)
             possible_neighbors = [np.add(self.location, d) for d in possible_directions]
-            self.location = self.choose_most_phermones_neighbor(possible_neighbors)
+            neighbor_phermones = self.get_phermones_per_neighbor(possible_neighbors)
+            # print(neighbor_phermones)
+            if(len(neighbor_phermones) == 0):
+                return self.sim.remove_ant(self)
+            new_location = neighbor_phermones[0][0]
+            self.direction = np.where(self.directions == np.subtract(new_location,self.location))[0][0]
+            if(len(neighbor_phermones) > 1):
+                if(neighbor_phermones[0][1] == neighbor_phermones[1][1]):
+                    self.move_explore()
+            # self.direction = self.directions
+
+            self.move_forward()
+
+
         else:
             return self.move_forward()
 
@@ -123,7 +136,7 @@ class Ant:
                 self.following = True
                 # self.move_forward()
                 # print(self.location)
-                best_neighbor = self.choose_most_phermones_neighbor(self.get_neighbors())
+                best_neighbor = self.get_phermones_per_neighbor(self.get_neighbors())[0][0]
                 # print(best_neighbor)
                 # print(np.add(np.subtract(self.location,best_neighbor),1))
                 self.direction = np.where(self.directions == np.add(np.subtract(self.location,best_neighbor),1))[0][0]
