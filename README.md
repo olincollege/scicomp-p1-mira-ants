@@ -9,7 +9,6 @@ I am not finished with this assignment, and I have communicated with Carrie. I b
 - make follow path smarter than just walk forward
 - make docstrings complete and consistent (they are mainly just basic descriptions right now)
 - more and better comments
-- visualization of some sort
 - check that the step logic actually matches the paper
 
 ## How to run

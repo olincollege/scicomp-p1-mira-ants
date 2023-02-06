@@ -1,6 +1,7 @@
 import numpy as np
 from ant import Ant
 import time
+import matplotlib.pyplot as plt
 
 class Simulation:
 
@@ -52,6 +53,17 @@ class Simulation:
     def remove_ant(self, ant):
         return self.ants.remove(ant)
 
+    """Draw the simulation.
+    """
+    def draw(self):
+        # Borrowed from Allen
+        # https://raw.githubusercontent.com/AllenDowney/ThinkComplexity2/master/notebooks/Cell2D.py
+        n, m = self.array.shape
+        plt.axis([0, m, 0, n])
+        plt.imshow(self.array, interpolation='none', origin='upper',extent=[0, m, 0, n])
+        plt.show()
+
+
     """Loop the simulation.
 
     n (default 10) is the number of times to loop
@@ -61,7 +73,9 @@ class Simulation:
     def loop(self, n = 10, print_iter = False, sleep = None):
         # return [self.step() for _ in range(n)]
         for _ in range(n):
-            if(print):
+            if(print_iter):
                 print(self.step())
+            else:
+                self.step()
             if(sleep):
                 time.sleep(sleep)
