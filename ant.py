@@ -51,7 +51,9 @@ class Ant:
         neighbors = convolve2d(location_array, self.neighbor_kernel).nonzero()
         return list(zip(neighbors[0],neighbors[1]))
 
-    """Return the neighbor with the highest number of phermones
+    """Return the list of neighbors, ordered by phermones.
+
+    get_phermones_per_neighbor(self.get_neighbors())[0][0] will be the location of the highest phermone neighbor
 
     returns: a list of 2-length tuples of 2-length location tuples and corresponding phermone levels, sorted with highest level first
     """
