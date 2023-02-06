@@ -12,12 +12,12 @@ class Simulation:
     `fidelity` (default 5) is the threshold for the fidelity check returning `True`
     `phermone_limit` (default 10) is the maximum phermone value that the ants can detect
     """
-    def __init__(self, shape=(15,15), phermone_deposit_rate = 4, fidelity = 5, phermone_limit = 10, trail_level = 4):
+    def __init__(self, shape=(15,15), phermone_deposit_rate = 3, fidelity_min = 2, fidelity_max = 20, trail_level = 5):
         self.array = np.int_(np.zeros(shape=shape))
 
         self.phermone_deposit_rate = phermone_deposit_rate
-        self.fidelity = fidelity
-        self.phermone_limit = phermone_limit
+        self.fidelity_min = fidelity_min
+        self.fidelity_max = fidelity_max
         self.trail_level = trail_level
         # print(self.array)
         # self.array = np.random.randint(0,10,size=shape)
@@ -28,7 +28,7 @@ class Simulation:
     """Run a single step of the simulation, including phermone evaporation and ant steps
     """
     def step(self):
-        self.ants.append(Ant(self, fidelity=self.fidelity, phermone_limit=self.phermone_limit, trail_level=self.trail_level))
+        self.ants.append(Ant(self, fidelity_min=self.fidelity_min, fidelity_max=self.fidelity_max, trail_level=self.trail_level))
         [a.step() for a in self.ants]
 
         # This is a kinda cursed way to decrease the phermone level of the entire space by 1 bottoming out at 0
@@ -62,7 +62,12 @@ class Simulation:
         # https://raw.githubusercontent.com/AllenDowney/ThinkComplexity2/master/notebooks/Cell2D.py
         n, m = self.array.shape
         plt.axis([0, m, 0, n])
-        plt.imshow(self.array, interpolation='none', origin='upper',extent=[0, m, 0, n])
+        ctr = np.int_(np.round(np.divide(self.array.shape,2)))
+        arr = self.array.copy()
+        ctr[0] = ctr[0]-1
+        ctr[1] = ctr[1]+1
+        # arr[*ctr] = 0
+        plt.imshow(arr, interpolation='none', origin='upper',extent=[0, m, 0, n])
         plt.show()
 
 
