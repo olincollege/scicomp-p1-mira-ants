@@ -1,6 +1,16 @@
 # scicomp-p1-mira-ants
 
-I am not finished with this assignment, and I have communicated with Carrie.
+## A note
+I am not finished with this assignment, and I have communicated with Carrie. I believe this simulation achieves the same behaviors as the original paper, but I have not yet confirmed that. Further work includes a few more model characteristics, improving my docstrings, and writing comments. Please keep that in mind when reviewing.
+
+### To dos:
+- make turning off path random
+- implement forking (beyond stupid go forward)
+- make follow path smarter than just walk forward
+- make docstrings complete and consistent (they are mainly just basic descriptions right now)
+- more and better comments
+- visualization of some sort
+- check that the step logic actually matches the paper
 
 ## How to run
 
@@ -32,13 +42,5 @@ Optional parameters of Simulation:
 from ant_simulation import Simulation
 sim = Simulation()
 sim.loop(100, print_iter=True, sleep=0.1)
+print(sim.array)
 ```
-
-## todos:
-- make turning off path random
-- implement forking (beyond stupid go forward)
-- make follow path smarter than just walk forward
-- docstrings
-- comments
-- visualization of some sort
-- check that the step logic actually matches the paper
