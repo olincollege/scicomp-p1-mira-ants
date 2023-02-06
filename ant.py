@@ -6,12 +6,13 @@ class Ant:
     sim is the simulation the ant is a part of (for calling simulation modifying functions)
     See ant_simulation for parameter definitions
     """
-    def __init__(self, sim, fidelity, phermone_limit):
+    def __init__(self, sim, fidelity, phermone_limit, trail_level):
         self.location = np.int_(np.round(np.divide(sim.array.shape,2)))
         self.following = False
         self.fidelity = fidelity
         self.sim = sim
         self.phermone_limit = phermone_limit
+        self.trail_level = trail_level
 
         # Directions that the ant can be pointing
         self.directions = [(-1,-1),(-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1)]
@@ -54,16 +55,18 @@ class Ant:
 
     returns: a 2-length tuple
     """
-    def choose_most_phermones_neighbor(self):
+    def choose_most_phermones_neighbor(self, possible_locs):
         # print(self.get_neighbors())
         phermone_levels = []
-        for l in self.get_neighbors():
+        for l in possible_locs:
             if(l[0] > 0 and l[1] > 0 and l[0] <= self.sim.array.shape[0]-1 and l[1] <= self.sim.array.shape[1]-1):
-                phermone_levels.append((l,self.sim.array[*l]))
+                loc_level = min(self.sim.array[*l],self.phermone_limit)
+                phermone_levels.append((l,loc_level))
 
         # _ = [print(self.sim.array[l]) for l in self.get_neighbors()]
         phermone_levels.sort(key=lambda level:level[1],reverse=True)
         # print(phermone_levels[0][0])
+        # print(phermone_levels)
         return phermone_levels[0][0]
 
     """Move forward (toward current direction)
@@ -72,6 +75,19 @@ class Ant:
         self.location = np.add(self.location, self.directions[self.direction])
         # print(self.location)
         return self.location
+
+    """Move while following
+    """
+    def move_follow(self):
+        new_location = np.add(self.location, self.directions[self.direction])
+        if(self.sim.array[*new_location] < self.trail_level):
+            possible_directions = (self.directions[(self.direction-1) % 8],self.directions[(self.direction + 1) % 8])
+            # print(possible_directions)
+            possible_neighbors = [np.add(self.location, d) for d in possible_directions]
+            self.location = self.choose_most_phermones_neighbor(possible_neighbors)
+        else:
+            return self.move_forward()
+
 
     """Move while exploring (random turn)
     """
@@ -94,7 +110,7 @@ class Ant:
             # print("following")
             if(self.fidelity_test()):
                 # continue following
-                self.move_forward()
+                self.move_follow()
             else:
                 # wander off
                 self.following = False
@@ -107,7 +123,7 @@ class Ant:
                 self.following = True
                 # self.move_forward()
                 # print(self.location)
-                best_neighbor = self.choose_most_phermones_neighbor()
+                best_neighbor = self.choose_most_phermones_neighbor(self.get_neighbors())
                 # print(best_neighbor)
                 # print(np.add(np.subtract(self.location,best_neighbor),1))
                 self.direction = np.where(self.directions == np.add(np.subtract(self.location,best_neighbor),1))[0][0]

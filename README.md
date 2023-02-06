@@ -5,8 +5,6 @@ I am not finished with this assignment, and I have communicated with Carrie. I b
 
 ### To dos:
 - make turning off path random
-- implement forking (beyond stupid go forward)
-- make follow path smarter than just walk forward
 - make docstrings complete and consistent (they are mainly just basic descriptions right now)
 - more and better comments
 - check that the step logic actually matches the paper

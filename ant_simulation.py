@@ -12,12 +12,13 @@ class Simulation:
     `fidelity` (default 5) is the threshold for the fidelity check returning `True`
     `phermone_limit` (default 10) is the maximum phermone value that the ants can detect
     """
-    def __init__(self, shape=(15,15), phermone_deposit_rate = 4, fidelity = 5, phermone_limit = 10):
+    def __init__(self, shape=(15,15), phermone_deposit_rate = 4, fidelity = 5, phermone_limit = 10, trail_level = 4):
         self.array = np.int_(np.zeros(shape=shape))
 
         self.phermone_deposit_rate = phermone_deposit_rate
         self.fidelity = fidelity
         self.phermone_limit = phermone_limit
+        self.trail_level = trail_level
         # print(self.array)
         # self.array = np.random.randint(0,10,size=shape)
         # self.ants = [Ant(self) for _ in range(n)]
@@ -27,9 +28,10 @@ class Simulation:
     """Run a single step of the simulation, including phermone evaporation and ant steps
     """
     def step(self):
-        self.ants.append(Ant(self, fidelity=self.fidelity, phermone_limit=self.phermone_limit))
+        self.ants.append(Ant(self, fidelity=self.fidelity, phermone_limit=self.phermone_limit, trail_level=self.trail_level))
         [a.step() for a in self.ants]
 
+        # This is a kinda cursed way to decrease the phermone level of the entire space by 1 bottoming out at 0
         stepdown = np.vectorize(lambda x:max(x-1,0))
         self.array = stepdown(self.array)
         return self.array
