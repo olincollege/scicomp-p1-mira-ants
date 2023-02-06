@@ -2,7 +2,7 @@ import numpy as np
 from scipy.signal import convolve2d
 import random
 class Ant:
-    def __init__(self, sim, fidelity = 3, phermone_limit=None):
+    def __init__(self, sim, fidelity = 5, phermone_limit=10):
         self.location = np.int_(np.round(np.divide(sim.array.shape,2)))
         self.following = False
         self.fidelity = fidelity
@@ -52,7 +52,8 @@ class Ant:
         return self.location
 
     def move_explore(self):
-        turn_choice = np.random.randint(-3,4)
+        turn_choice = np.random.choice(range(-3,4),p=[0.04,0.06,0.2,0.4,0.2,0.06,0.04])
+
         new_direction = self.direction + turn_choice
         new_direction = new_direction % 8
         # print(new_direction)

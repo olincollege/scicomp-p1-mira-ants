@@ -19,7 +19,7 @@ class Simulation:
         self.array = stepdown(self.array)
         return self.array
 
-    def deposit_phermone(self, loc, n = 3):
+    def deposit_phermone(self, loc, n = 4):
         # print(loc)
         # print(self.array[*loc])
         self.array[*loc] += n
@@ -33,4 +33,4 @@ class Simulation:
         # return [self.step() for _ in range(n)]
         for _ in range(n):
             print(self.step())
-            time.sleep(1)
+            time.sleep(0.1)
