@@ -1,5 +1,6 @@
 import numpy as np
 from ant import Ant
+import time
 
 class Simulation:
     def __init__(self, shape):
@@ -18,7 +19,7 @@ class Simulation:
         self.array = stepdown(self.array)
         return self.array
 
-    def deposit_phermone(self, loc, n = 6):
+    def deposit_phermone(self, loc, n = 3):
         # print(loc)
         # print(self.array[*loc])
         self.array[*loc] += n
@@ -29,4 +30,7 @@ class Simulation:
         self.ants.remove(ant)
 
     def loop(self, n):
-        return [self.step() for _ in range(n)]
+        # return [self.step() for _ in range(n)]
+        for _ in range(n):
+            print(self.step())
+            time.sleep(1)
