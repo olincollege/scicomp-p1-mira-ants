@@ -6,11 +6,12 @@ class Ant:
     sim is the simulation the ant is a part of (for calling simulation modifying functions)
     See ant_simulation for parameter definitions
     """
-    def __init__(self, sim, fidelity_min, fidelity_max, trail_level):
+    def __init__(self, sim, fidelity_min, fidelity_max, phermone_max, trail_level):
         self.location = np.int_(np.round(np.divide(sim.array.shape,2)))
         self.following = False
         self.fidelity_min = fidelity_min
         self.fidelity_max = fidelity_max
+        self.phermone_max = phermone_max
         self.sim = sim
         self.trail_level = trail_level
 
@@ -26,6 +27,7 @@ class Ant:
         # self.direction = 5
         self.neighbor_kernel = np.ones((3,3))
         self.neighbor_kernel[1,1] = 0
+        self.move_forward
         # print(self.neighbor_kernel)
 
     """Make a decision based on the local phermone count and the fidelity
@@ -34,10 +36,11 @@ class Ant:
     """
     def fidelity_test(self):
         pher_level = self.sim.array[*self.location]
-        pher_frac = (self.fidelity_min + pher_level)/(self.fidelity_min + self.fidelity_max)
+        pher_frac = pher_level/self.phermone_max
         # print(self.sim.array)
         # print(pher_level)
-        pher_frac = min(1,pher_frac)
+        pher_frac = min(self.fidelity_max,pher_frac)
+        pher_frac = max(self.fidelity_min,pher_frac)
         return (np.random.choice([True, False], p=[pher_frac,1-pher_frac]))
 
     """Get location of each neighbor
@@ -62,7 +65,7 @@ class Ant:
         phermone_levels = []
         for l in possible_locs:
             if(l[0] > 0 and l[1] > 0 and l[0] <= self.sim.array.shape[0]-1 and l[1] <= self.sim.array.shape[1]-1):
-                loc_level = min(self.sim.array[*l],self.fidelity_max)
+                loc_level = min(self.sim.array[*l],self.phermone_max)
                 phermone_levels.append((l,loc_level))
 
         # _ = [print(self.sim.array[l]) for l in self.get_neighbors()]
@@ -83,7 +86,9 @@ class Ant:
     def move_follow(self):
         new_location = np.add(self.location, self.directions[self.direction])
         if(self.sim.array[*new_location] < self.trail_level):
-            possible_directions = (self.directions[self.direction], self.directions[(self.direction-1) % 8],self.directions[(self.direction + 1) % 8])
+            # print(self.direction)
+            # possible_directions = (self.directions[self.direction], self.directions[(self.direction-1) % 8],self.directions[(self.direction + 1) % 8])
+            possible_directions = [self.directions[(self.direction + i) % 8] for i in range(-2,3)]
             # print(possible_directions)
             possible_neighbors = [np.add(self.location, d) for d in possible_directions]
             neighbor_phermones = self.get_phermones_per_neighbor(possible_neighbors)
@@ -110,8 +115,10 @@ class Ant:
     """Move while exploring (random turn)
     """
     def move_explore(self):
-        turn_choice = np.random.choice(range(-3,4),p=[0.04,0.06,0.2,0.4,0.2,0.06,0.04])
-
+        probs = [1, 2, 4, 2, 1]
+        probs = [p/sum(probs) for p in probs]
+        turn_choice = np.random.choice(range(-2,3),p=probs)
+        # print(turn_choice)
         new_direction = self.direction + turn_choice
         new_direction = new_direction % 8
         # print(new_direction)
