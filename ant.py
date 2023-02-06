@@ -2,7 +2,7 @@ import numpy as np
 from scipy.signal import convolve2d
 import random
 class Ant:
-    def __init__(self, sim, fidelity = 5, phermone_limit=10):
+    def __init__(self, sim, fidelity, phermone_limit):
         self.location = np.int_(np.round(np.divide(sim.array.shape,2)))
         self.following = False
         self.fidelity = fidelity
@@ -78,12 +78,12 @@ class Ant:
                 # begin following
                 self.following = True
                 # self.move_forward()
-                print(self.location)
+                # print(self.location)
                 best_neighbor = self.choose_most_phermones_neighbor()
-                print(best_neighbor)
-                print(np.add(np.subtract(self.location,best_neighbor),1))
+                # print(best_neighbor)
+                # print(np.add(np.subtract(self.location,best_neighbor),1))
                 self.direction = np.where(self.directions == np.add(np.subtract(self.location,best_neighbor),1))[0][0]
-                print(self.direction)
+                # print(self.direction)
             else:
                 # continue exploring
                 self.move_explore()
