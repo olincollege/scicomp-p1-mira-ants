@@ -41,3 +41,9 @@ sim = Simulation()
 sim.loop(100, print_iter=True, sleep=0.1)
 print(sim.array)
 ```
+
+## Project Structure Overview
+
+- main.py (TODO: link) is a file only to run the simulation.
+- ant_simulation.py (TODO: link) contains the Simulation class, which is the class that controls each run of the simulation. This handles tracking & modifying phermone levels, tracking and stepping each ant,displaying, and stores the simulation's variable values
+- ant.py (TODO: link) contains the Ant class, which is the class for each agent. Each ant tracks its location, applicable variable values, what simulation it belongs to, and handles movement logic.
