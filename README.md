@@ -33,3 +33,12 @@ from ant_simulation import Simulation
 sim = Simulation()
 sim.loop(100, print_iter=True, sleep=0.1)
 ```
+
+## todos:
+- make turning off path random
+- implement forking (beyond stupid go forward)
+- make follow path smarter than just walk forward
+- docstrings
+- comments
+- visualization of some sort
+- check that the step logic actually matches the paper

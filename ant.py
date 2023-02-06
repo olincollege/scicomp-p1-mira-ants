@@ -2,22 +2,34 @@ import numpy as np
 from scipy.signal import convolve2d
 import random
 class Ant:
+    """Initialize the ant
+    sim is the simulation the ant is a part of (for calling simulation modifying functions)
+    See ant_simulation for parameter definitions
+    """
     def __init__(self, sim, fidelity, phermone_limit):
         self.location = np.int_(np.round(np.divide(sim.array.shape,2)))
         self.following = False
         self.fidelity = fidelity
         self.sim = sim
         self.phermone_limit = phermone_limit
+
+        # Directions that the ant can be pointing
         self.directions = [(-1,-1),(-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1)]
         # Directions Indices
         # 012
         # 7 3
         # 654
+
+        # start in a random direction
         self.direction = np.random.randint(0,7)
         self.neighbor_kernel = np.int_(np.ones((3,3)))
         self.neighbor_kernel[1,1] = 0
         # print(self.neighbor_kernel)
 
+    """Make a decision based on the local phermone count and the fidelity
+
+    returns: boolean choice
+    """
     def fidelity_test(self):
         pher_level = self.sim.array[*self.location]
         # print(self.sim.array)
@@ -27,6 +39,10 @@ class Ant:
                 pher_level = self.phermone_limit
         return pher_level < self.fidelity
 
+    """Get location of each neighbor
+
+    returns: a list of 2-length tuples specifying neighbor locations
+    """
     def get_neighbors(self):
         location_array = np.zeros_like(self.sim.array)
         # print(self.location)
@@ -34,6 +50,10 @@ class Ant:
         neighbors = convolve2d(location_array, self.neighbor_kernel).nonzero()
         return list(zip(neighbors[0],neighbors[1]))
 
+    """Return the neighbor with the highest number of phermones
+
+    returns: a 2-length tuple
+    """
     def choose_most_phermones_neighbor(self):
         # print(self.get_neighbors())
         phermone_levels = []
@@ -46,11 +66,15 @@ class Ant:
         # print(phermone_levels[0][0])
         return phermone_levels[0][0]
 
+    """Move forward (toward current direction)
+    """
     def move_forward(self):
         self.location = np.add(self.location, self.directions[self.direction])
         # print(self.location)
         return self.location
 
+    """Move while exploring (random turn)
+    """
     def move_explore(self):
         turn_choice = np.random.choice(range(-3,4),p=[0.04,0.06,0.2,0.4,0.2,0.06,0.04])
 
@@ -60,6 +84,10 @@ class Ant:
         return self.move_forward()
 
 
+    """Movement behavior for each step
+
+    Not gonna lie, this is a hot mess that needs more documentation.
+    """
     def step(self):
         # self.move_forward()
         if(self.following):
@@ -89,6 +117,8 @@ class Ant:
                 self.move_explore()
 
         # print(self.sim.array.shape)
+
+        # If ant location is outside space bounds, remove this ant from the simulation
         if(self.location[0] < 0 or self.location[1] < 0 or self.location[0] >= self.sim.array.shape[0]-1 or self.location[1] >= self.sim.array.shape[1]-1):
             self.sim.remove_ant(self)
 
