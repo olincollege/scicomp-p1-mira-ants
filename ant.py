@@ -115,7 +115,7 @@ class Ant:
     """Move while exploring (random turn)
     """
     def move_explore(self):
-        probs = [1, 2, 4, 2, 1]
+        probs = [1, 4, 9, 4, 1]
         probs = [p/sum(probs) for p in probs]
         turn_choice = np.random.choice(range(-2,3),p=probs)
         # print(turn_choice)
@@ -167,6 +167,7 @@ class Ant:
                 phers = [i[1] for i in nbr_phers]
                 phers = phers/np.sum(phers)
                 self.direction = np.random.choice(dirs, p=phers)
+                # self.direction = dirs[0]
                 # self.move_forward()
                 # print(self.direction)
             else:
@@ -177,7 +178,7 @@ class Ant:
 
         # If ant location is outside space bounds, remove this ant from the simulation
         if(self.location[0] < 0 or self.location[1] < 0 or self.location[0] >= self.sim.array.shape[0]-1 or self.location[1] >= self.sim.array.shape[1]-1):
-            self.sim.remove_ant(self)
+            return self.sim.remove_ant(self)
 
         self.sim.deposit_phermone(self.location)
         # print(self.direction)
