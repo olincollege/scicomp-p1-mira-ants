@@ -27,7 +27,8 @@ class Ant:
         # self.direction = 5
         self.neighbor_kernel = np.ones((3,3))
         self.neighbor_kernel[1,1] = 0
-        self.move_forward
+        # self.sim.deposit_phermone(self.location)
+        # self.move_forward()
         # print(self.neighbor_kernel)
 
     """Make a decision based on the local phermone count and the fidelity
@@ -81,14 +82,63 @@ class Ant:
         # print(self.location)
         return self.location
 
+    def calc_direction(self, test_location):
+
+        direction = np.where(self.directions == np.subtract(test_location,self.location))[0][0]
+        x = np.where(self.directions == np.subtract(test_location,self.location), 1, 0)
+        direction_bool_vecs = self.directions == np.subtract(test_location,self.location)
+        direction_bools = [i[0] and i[1] for i in direction_bool_vecs]
+        direction = np.where(direction_bools)[0][0]
+        # print(direction)
+        # if(x[0]==1 and x[1]==1):
+            # print(self.location, test_location, direction)
+        return direction
+
+
+
+    def move_follow_new(self):
+        possible_directions = [self.directions[(self.direction + i) % 8] for i in [-1,0,1]]
+        # print(possible_directions)
+        possible_neighbors = [np.add(self.location, d) for d in possible_directions]
+        neighbor_phermones = self.get_phermones_per_neighbor(possible_neighbors)
+
+        if(len(neighbor_phermones) == 0):
+            self.sim.remove_ant(self)
+            print("something went wrong")
+
+        elif(len(neighbor_phermones) == 1):
+            new_location = neighbor_phermones[0][0]
+            self.direction = self.calc_direction(new_location)
+            self.move_forward()
+        else:
+
+            forward_location = np.add(self.location, self.directions[self.direction])
+            max_location = neighbor_phermones[0][0]
+            # print(forward_location)
+            # print(max_location)
+
+            if(max_location[0] == forward_location[0] and max_location[1] == forward_location[1]):
+                self.move_forward()
+            elif(neighbor_phermones[0][1] == neighbor_phermones[1][1]):
+                self.move_explore()
+            else:
+                new_location = max_location
+                self.direction = self.calc_direction(new_location)
+                self.move_forward()
+
+        return None
+
+
+        # self.location = new_location
+
     """Move while following
     """
-    def move_follow(self):
+    def move_follow_old(self):
         new_location = np.add(self.location, self.directions[self.direction])
         if(self.sim.array[*new_location] < self.trail_level):
             # print(self.direction)
             # possible_directions = (self.directions[self.direction], self.directions[(self.direction-1) % 8],self.directions[(self.direction + 1) % 8])
-            possible_directions = [self.directions[(self.direction + i) % 8] for i in range(-2,3)]
+            possible_directions = [self.directions[(self.direction + i) % 8] for i in [-1,0,1]]
             # print(possible_directions)
             possible_neighbors = [np.add(self.location, d) for d in possible_directions]
             neighbor_phermones = self.get_phermones_per_neighbor(possible_neighbors)
@@ -96,7 +146,8 @@ class Ant:
             if(len(neighbor_phermones) == 0):
                 return self.sim.remove_ant(self)
             new_location = neighbor_phermones[0][0]
-            self.direction = np.where(self.directions == np.subtract(new_location,self.location))[0][0]
+            # self.direction = np.where(self.directions == np.subtract(new_location,self.location))[0][0]
+            self.direction = self.calc_direction(new_location)
             if(len(neighbor_phermones) > 1):
                 if(neighbor_phermones[0][1] == neighbor_phermones[1][1]):
                     self.move_explore()
@@ -111,25 +162,41 @@ class Ant:
             else:
                 return self.move_explore()
 
+    def move_follow(self):
+        self.move_follow_old()
 
     """Move while exploring (random turn)
     """
     def move_explore(self):
-        probs = [1, 4, 9, 4, 1]
+        # probs = [1, 4, 9, 16, 9, 4, 1]
+        probs = [1, 2, 3, 4, 3, 2, 1]
         probs = [p/sum(probs) for p in probs]
-        turn_choice = np.random.choice(range(-2,3),p=probs)
+        # print(probs)
+        turn_choice = np.random.choice([-3,-2,-1,0,1,2,3],p=probs)
         # print(turn_choice)
         new_direction = self.direction + turn_choice
         new_direction = new_direction % 8
+        self.direction = new_direction
         # print(new_direction)
+        # self.randomize_direction()
         return self.move_forward()
 
+    def randomize_direction(self):
+        self.direction = np.random.randint(0,8)
+
+
+    def step_testing(self):
+        self.move_follow()
+        # If ant location is outside space bounds, remove this ant from the simulation
+        if(self.location[0] < 0 or self.location[1] < 0 or self.location[0] >= self.sim.array.shape[0]-1 or self.location[1] >= self.sim.array.shape[1]-1):
+            return self.sim.remove_ant(self)
+        self.sim.deposit_phermone(self.location)
 
     """Movement behavior for each step
 
     Not gonna lie, this is a hot mess that needs more documentation.
     """
-    def step(self):
+    def step_real(self):
         # self.move_forward()
         if(self.following):
             # print("following")
@@ -176,8 +243,9 @@ class Ant:
 
         # print(self.sim.array.shape)
 
-        # If ant location is outside space bounds, remove this ant from the simulation
-        if(self.location[0] < 0 or self.location[1] < 0 or self.location[0] >= self.sim.array.shape[0]-1 or self.location[1] >= self.sim.array.shape[1]-1):
+        # If ant location is on the edge of space bounds, remove this ant from the simulation.
+        # Also removes when at the border, to ensure that the missing neighbor behavior doesn't affect the algorithms
+        if(self.location[0] < 1 or self.location[1] < 1 or self.location[0] >= self.sim.array.shape[0]-2 or self.location[1] >= self.sim.array.shape[1]-2):
             return self.sim.remove_ant(self)
 
         self.sim.deposit_phermone(self.location)
