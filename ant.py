@@ -12,11 +12,11 @@ class Ant:
         Args:
             self
             sim: the Simulation object the ant is a part of (for calling simulation modifying functions)
-            fidelity_min: float decimal between 0 and 1, the minimum chance of self.fidelity_test() returning true
-            fidelity_max: float decimal between 0 and 1, the maximum chance of self.fidelity_test() returning true
-            phermone_max: integer, the maximum quantity of phermones that the ant can sense
-            trail_level: integer, the minimum phermone level that the ant will consider to be following a trail
-            turning_kernel: the turning kernel to be used when exploring
+            fidelity_min (default 0.01): float decimal between 0 and 1, the minimum chance of self.fidelity_test() returning true
+            fidelity_max (default 0.99): float decimal between 0 and 1, the maximum chance of self.fidelity_test() returning true
+            phermone_max (default 80): integer, the maximum quantity of phermones that the ant can sense
+            trail_level (default 8): integer, the minimum phermone level that the ant will consider to be following a trail
+            turning_kernel (default [1,2,3,4,3,2,1]): the turning kernel to be used when exploring. Must be an odd length, and should be between 1 and 7 items long
         Returns:
             none
         """

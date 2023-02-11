@@ -23,14 +23,14 @@ class Simulation:
 
         Args:
             self
-            shape (default (256,256)) is a 2-element tuple that specifies the size of the simulation space
-            phermone_deposit_rate (default 16) is the integer amount of phermones deposited by an ant per time step
-            phermone_evap_rate (default 1) is the integer amount of phermones that evaporate per cell over time
-            fidelity_min: float decimal between 0 and 1, the minimum chance of self.fidelity_test() returning true
-            fidelity_max: float decimal between 0 and 1, the maximum chance of self.fidelity_test() returning true
-            phermone_max: integer, the maximum quantity of phermones that the ant can sense
-            trail_level: integer, the minimum phermone level that the ant will consider to be following a trail
-            turning_kernel: the turning kernel to be used when exploring
+            shape (default (256,256)): 2-element tuple that specifies the size of the simulation space
+            phermone_deposit_rate (default 16): integer amount of phermones deposited by an ant per time step
+            phermone_evap_rate (default 1): integer amount of phermones that evaporate per cell over time
+            fidelity_min (default 0.01): float decimal between 0 and 1, the minimum chance of self.fidelity_test() returning true
+            fidelity_max (default 0.99): float decimal between 0 and 1, the maximum chance of self.fidelity_test() returning true
+            phermone_max (default 80): integer, the maximum quantity of phermones that the ant can sense
+            trail_level (default 8): integer, the minimum phermone level that the ant will consider to be following a trail
+            turning_kernel (default [1,2,3,4,3,2,1]): the turning kernel to be used when exploring. Must be an odd length, and should be between 1 and 7 items long
         """
 
         # Array of phermones is specified by shape
