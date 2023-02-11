@@ -1,57 +1,23 @@
-# from ant import Ant
 from ant_simulation import Simulation
 import matplotlib.pyplot as plt
 import numpy as np
 
 def main():
-    # sim = Simulation(shape=(11,11))
     np.random.seed(2)
-    sim = Simulation(shape=(256,256), phermone_deposit_rate = 16, phermone_evap_rate = 1, fidelity_min = 0.0, fidelity_max = 0.999, phermone_max = 160, trail_level = 8)
-    # print(sim.array)
-    # ant = Ant(sim)
-    # print(ant.get_neighbors())
-    # print(ant.choose_most_phermones_neighbor())
+    sim = Simulation()
 
-    # print(sim.array)
-    # sim.loop(2,print_iter=True)
-    plt.subplot(2, 3, 1)
-    sim.loop(20)
-    sim.draw()
-    plt.colorbar()
-    plt.title("20 Steps")
-    plt.subplot(2, 3, 2)
-    # plt.figure()
-    sim.loop(60)
-    sim.draw()
-    plt.colorbar()
-    plt.title("80 Steps")
-    plt.subplot(2, 3, 3)
-    sim.loop(120)
-    sim.draw()
-    plt.colorbar()
-    plt.title("200 Steps")
-    plt.subplot(2, 3, 4)
-    # plt.figure()
-    sim.loop(600)
-    sim.draw()
-    plt.colorbar()
-    plt.title("800 Steps")
-    plt.subplot(2, 3, 5)
-    # plt.figure()
-    sim.loop(2200)
-    sim.draw()
-    plt.colorbar()
-    plt.title("3,000 Steps")
-    plt.subplot(2, 3, 6)
-    # plt.figure()
-    sim.loop(7000)
-    sim.draw()
-    plt.colorbar()
-    plt.title("10,000 Steps")
+    plots = [0, 20, 80, 200, 800, 3000, 10000]
+    diff_plots = np.diff(plots)
+
+    for p in range(len(diff_plots)):
+        plt.subplot(2, 3, p+1)
+        sim.loop(diff_plots[p])
+        sim.draw()
+        plt.colorbar()
+        plt.title(str(plots[p+1]) + " Steps")
+        print("Iterated " + str(plots[p+1]) + " steps")
+
     plt.show()
 
-    # sim.loop(10000)
-    # sim.draw()
-    # plt.show()
 if __name__=="__main__":
     main()

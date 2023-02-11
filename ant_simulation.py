@@ -8,9 +8,9 @@ class Simulation:
                  shape=(256,256),
                  phermone_deposit_rate = 16,
                  phermone_evap_rate = 1,
-                 fidelity_min = 0.0,
-                 fidelity_max = 0.999,
-                 phermone_max = 160,
+                 fidelity_min = 0.01,
+                 fidelity_max = 0.99,
+                 phermone_max = 80,
                  trail_level = 8,
                  turning_kernel = [1,2,3,4,3,2,1]
                  ):
@@ -95,6 +95,8 @@ class Simulation:
     def draw(self):
         """Draw the simulation. Borrowed from Allen Downey
 
+        I added the behavior of drawing the center space as 0, because that space was getting the most phermones by far.
+
         Args:
             self
         Returns:
@@ -105,6 +107,8 @@ class Simulation:
         n, m = self.array.shape
         plt.axis([0, m, 0, n])
         arr = self.array.copy()
+        ctr = np.int_(np.round(np.divide(self.array.shape,2)))
+        arr[*ctr] = 0
         plt.imshow(arr, interpolation='none', origin='upper',extent=[0, m, 0, n])
 
 

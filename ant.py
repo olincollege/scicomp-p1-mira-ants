@@ -234,9 +234,9 @@ class Ant:
         # l is length of turning kernel
         l = len(self.turning_kernel)
         # Low side of the range is negative one half of one less than the length. For the default turning kernel of [1,2,3,4,3,2,1], that is -3
-        lo = -(l-1)/2
+        lo = int(-(l-1)/2)
         # High side of the range is one half of one more than the length. For the default, that is 4.
-        hi = (l+1)/2
+        hi = int((l+1)/2)
 
         # Randomly choose a turn direction
         turn_choice = np.random.choice(range(lo,hi),p=prob_fracs)
