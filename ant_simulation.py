@@ -1,3 +1,6 @@
+"""This defile defines the Simulation object, which handles all simulation logic for the ant simulation.
+"""
+
 import numpy as np
 from ant import Ant
 import time
@@ -14,7 +17,9 @@ class Simulation:
                  trail_level = 8,
                  turning_kernel = [1,2,3,4,3,2,1]
                  ):
-        """Create the simulation object
+        """Create the simulation object.
+
+        Note: Type and range restrictions are included in docstrings, but are not enforced. If these bounds are not followed, unexpected behavior may occur.
 
         Args:
             self

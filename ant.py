@@ -1,3 +1,6 @@
+"""This file defines the Ant class. The ant class takes care of all ant movement, tracking, phermone deposit, and removal logic.
+"""
+
 import numpy as np
 
 class Ant:
