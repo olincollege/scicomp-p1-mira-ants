@@ -2,7 +2,7 @@ import numpy as np
 from scipy.signal import convolve2d
 import random
 class Ant:
-    def __init__(self, sim, fidelity_min, fidelity_max, phermone_max, trail_level):
+    def __init__(self, sim, fidelity_min, fidelity_max, phermone_max, trail_level, turning_kernel):
         """Initialize the ant.
 
         Note: Type and range restrictions are included in docstrings, but are not enforced. If these bounds are not followed, unexpected behavior may occur.
@@ -14,6 +14,7 @@ class Ant:
             fidelity_max: float decimal between 0 and 1, the maximum chance of self.fidelity_test() returning true
             phermone_max: integer, the maximum quantity of phermones that the ant can sense
             trail_level: integer, the minimum phermone level that the ant will consider to be following a trail
+            turning_kernel:
         Returns:
             none
         """
@@ -24,6 +25,7 @@ class Ant:
         self.phermone_max = phermone_max
         self.sim = sim
         self.trail_level = trail_level
+        self.turning_kernel = [1,2,3,4,3,2,1]
 
         # Directions that the ant can be pointing, in vector form
         self.directions = [(-1,-1),(-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1)]
@@ -171,35 +173,49 @@ class Ant:
 
         return None
 
-
-        # self.location = new_location
-
-    """Move while following
-    """
     def move_follow(self):
+        """Do the logic for the ant's movement while following
+
+        Args:
+            self
+        Returns:
+            2-length array of self.location, passed from self.move_forward
+            OR None, the return value of list.return()
+        """
+        # Location to test is right in front of us
         new_location = np.add(self.location, self.directions[self.direction])
+
+        # If right in front of us is not a trail
         if(self.sim.array[*new_location] < self.trail_level):
-            # print(self.direction)
-            # possible_directions = (self.directions[self.direction], self.directions[(self.direction-1) % 8],self.directions[(self.direction + 1) % 8])
+
+            # Possible directions are forward and left, forward, or forward and right. Make a list of the vector directions
             possible_directions = [self.directions[(self.direction + i) % 8] for i in [-1,0,1]]
-            # print(possible_directions)
+            # Add each vector direction to the current location to get a vector of possible end locations
             possible_neighbors = [np.add(self.location, d) for d in possible_directions]
+            # Get the phermone levels of the neighbors
             neighbor_phermones = self.get_phermones_per_neighbor(possible_neighbors)
-            # print(neighbor_phermones)
+            # If the length of the phermone levels is zero, we must have reached the edge and must be removed. This should never happen, but was here from troubleshooting
             if(len(neighbor_phermones) == 0):
                 return self.sim.remove_ant(self)
+
+            # New location is the first (and therefore highest, because get_phermones_per_neighbor sorts) neighbor
             new_location = neighbor_phermones[0][0]
-            # self.direction = np.where(self.directions == np.subtract(new_location,self.location))[0][0]
+
+            # Update direction to be towards most phermone neighbor
             self.direction = self.calc_direction(new_location)
+
+            # If multipe neighbors (this should always be true but this is a safety from testing)
             if(len(neighbor_phermones) > 1):
+                # If the 2 highest phermone levels are equal
                 if(neighbor_phermones[0][1] == neighbor_phermones[1][1]):
-                    self.move_explore()
-            # self.direction = self.directions
+                    # Then behave as if exploring
+                    return self.move_explore()
 
+            # If we didn't explore, then move forward and end step
             return self.move_forward()
-
-
+        # If in front of us is a valid trail, then...
         else:
+            # Do a fidelity test. If that returns True, then follow the trail. If it returns False, behave as if exploring
             if(self.fidelity_test()):
                 return self.move_forward()
             else:
@@ -209,38 +225,43 @@ class Ant:
     """Move while exploring (random turn)
     """
     def move_explore(self):
-        # probs = [1, 4, 9, 16, 9, 4, 1]
-        probs = [1, 2, 3, 4, 3, 2, 1]
-        probs = [p/sum(probs) for p in probs]
-        # print(probs)
-        turn_choice = np.random.choice([-3,-2,-1,0,1,2,3],p=probs)
-        # print(turn_choice)
+        """Move according to exploring logic.
+
+        While exploring, ants choose a random direction according to the turning kernel
+
+        Args:
+            self
+        Returns:
+            a 2-length array, self.location passed from self.move_forward
+        """
+        # Calculate the fractional probability for the turning kernel. This allows turning kernel to be anything, even though we need probabilities that sum to one
+        prob_fracs = [p/sum(self.turning_kernel) for p in self.turning_kernel]
+        # l is length of turning kernel
+        l = len(self.turning_kernel)
+        # Low side of the range is negative one half of one less than the length. For the default turning kernel of [1,2,3,4,3,2,1], that is -3
+        lo = -(l-1)/2
+        # High side of the range is one half of one more than the length. For the default, that is 4.
+        hi = (l+1)/2
+
+        # Randomly choose a turn direction
+        turn_choice = np.random.choice(range(lo,hi),p=prob_fracs)
+        # New direction index
         new_direction = self.direction + turn_choice
         new_direction = new_direction % 8
+
+        # Set self.direction
         self.direction = new_direction
-        # print(new_direction)
-        # self.randomize_direction()
+
+        # Move forward
         return self.move_forward()
-
-    def randomize_direction(self):
-        self.direction = np.random.randint(0,8)
-
-
-    def step_testing(self):
-        self.move_follow()
-        # If ant location is outside space bounds, remove this ant from the simulation
-        if(self.location[0] < 0 or self.location[1] < 0 or self.location[0] >= self.sim.array.shape[0]-1 or self.location[1] >= self.sim.array.shape[1]-1):
-            return self.sim.remove_ant(self)
-        self.sim.deposit_phermone(self.location)
 
     """Movement behavior for each step
 
     Not gonna lie, this is a hot mess that needs more documentation.
     """
-    def step_real(self):
-        # self.move_forward()
+    def step(self):
+        # If we are currently following, do a fidelity test for whether we continue following or decide to explore
         if(self.following):
-            # print("following")
             if(self.fidelity_test()):
                 # continue following
                 self.move_follow()
@@ -249,24 +270,19 @@ class Ant:
                 self.following = False
                 self.move_explore()
         else:
-            # move
-            # print("not following")
             if(self.fidelity_test()):
                 # begin following
                 self.following = True
-                # self.move_forward()
-                # print(self.get_phermones_per_neighbor(self.get_neighbors()))
-                # print(self.location)
+
+                # Get all neighbors and phermones
                 nbr_phers = self.get_phermones_per_neighbor(self.get_neighbors())
-                # print(best_neighbor)
-                # print(np.subtract(self.location,best_neighbor))
-                # self.direction = np.where(self.directions == np.subtract(self.location,best_neighbor))[0][0]
-                # dirs = [np.where(self.directions == np.subtract(self.location,i[0])) for i in nbr_phers]
+                # Get location for each phermone
                 nbrs = [i[0] for i in nbr_phers]
+                # Get direction vectors
                 d_coords = list([np.subtract(self.location, n) for n in nbrs])
-                # print(d_coords)
 
                 dirs = []
+                # Get the direction choices. I don't understand what I did here and I don't want to decode it.
                 for d in d_coords:
                     for i in range(len(self.directions)):
                         j = self.directions[i]
@@ -274,22 +290,17 @@ class Ant:
                             dirs.append(i)
                 phers = [i[1] for i in nbr_phers]
                 phers = phers/np.sum(phers)
+                # Choose a direction to begin following next turn.
                 self.direction = np.random.choice(dirs, p=phers)
-                # self.direction = dirs[0]
-                # self.move_forward()
-                # print(self.direction)
             else:
                 # continue exploring
                 self.move_explore()
 
-        # print(self.sim.array.shape)
-
-        # If ant location is on the edge of space bounds, remove this ant from the simulation.
-        # Also removes when at the border, to ensure that the missing neighbor behavior doesn't affect the algorithms
+        # If we are outside the allowed coordinates, remove this ant. Ants may not be on the border locations or outside the simulation array
         if(self.location[0] < 1 or self.location[1] < 1 or self.location[0] >= self.sim.array.shape[0]-2 or self.location[1] >= self.sim.array.shape[1]-2):
             return self.sim.remove_ant(self)
 
+        # Tell the simulation to deposit phermone
         self.sim.deposit_phermone(self.location)
-        # print(self.direction)
 
         return self.location

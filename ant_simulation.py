@@ -12,7 +12,16 @@ class Simulation:
     `fidelity` (default 5) is the threshold for the fidelity check returning `True`
     `phermone_limit` (default 10) is the maximum phermone value that the ants can detect
     """
-    def __init__(self, shape=(15,15), phermone_deposit_rate = 3, phermone_evap_rate = 1, fidelity_min = 0.1, fidelity_max = 0.9, phermone_max = 20, trail_level = 5):
+    def __init__(self,
+                 shape=(15,15),
+                 phermone_deposit_rate = 3,
+                 phermone_evap_rate = 1,
+                 fidelity_min = 0.1,
+                 fidelity_max = 0.9,
+                 phermone_max = 20,
+                 trail_level = 5,
+                 turning_kernel = [1,2,3,4,3,2,1]
+                 ):
         self.array = np.int_(np.zeros(shape=shape))
         # self.array = np.random.rand(*shape)
 
@@ -22,16 +31,19 @@ class Simulation:
         self.fidelity_max = fidelity_max
         self.phermone_max = phermone_max
         self.trail_level = trail_level
-        # print(self.array)
-        # self.array = np.random.randint(0,10,size=shape)
-        # self.ants = [Ant(self) for _ in range(n)]
+        self.turning_kernel = turning_kernel
         self.ants = []
-        # print(self.array)
 
     """Run a single step of the simulation, including phermone evaporation and ant steps
     """
     def step(self):
-        self.ants.append(Ant(self, fidelity_min=self.fidelity_min, fidelity_max=self.fidelity_max, phermone_max = self.phermone_max, trail_level=self.trail_level))
+        self.ants.append(Ant(self,
+                             fidelity_min=self.fidelity_min,
+                             fidelity_max=self.fidelity_max,
+                             phermone_max = self.phermone_max,
+                             trail_level=self.trail_level,
+                             turning_kernel=self.turning_kernel
+                             ))
         [a.step_testing() for a in self.ants]
         # print(self.array)
 
