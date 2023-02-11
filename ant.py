@@ -13,7 +13,7 @@ class Ant:
             fidelity_max: float decimal between 0 and 1, the maximum chance of self.fidelity_test() returning true
             phermone_max: integer, the maximum quantity of phermones that the ant can sense
             trail_level: integer, the minimum phermone level that the ant will consider to be following a trail
-            turning_kernel:
+            turning_kernel: the turning kernel to be used when exploring
         Returns:
             none
         """
@@ -24,7 +24,7 @@ class Ant:
         self.phermone_max = phermone_max
         self.sim = sim
         self.trail_level = trail_level
-        self.turning_kernel = [1,2,3,4,3,2,1]
+        self.turning_kernel = turning_kernel
 
         # Directions that the ant can be pointing, in vector form
         self.directions = [(-1,-1),(-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1)]

@@ -4,26 +4,32 @@ import time
 import matplotlib.pyplot as plt
 
 class Simulation:
-
-    """Create the simulation object
-
-    `shape` (default (15,15)) is a 2-element tuple that specifies the size of the simulation space
-    `phermone_deposit_rate` (default 4) is the amount of phermones deposited by an ant per time step
-    `fidelity` (default 5) is the threshold for the fidelity check returning `True`
-    `phermone_limit` (default 10) is the maximum phermone value that the ants can detect
-    """
     def __init__(self,
-                 shape=(15,15),
-                 phermone_deposit_rate = 3,
+                 shape=(256,256),
+                 phermone_deposit_rate = 16,
                  phermone_evap_rate = 1,
-                 fidelity_min = 0.1,
-                 fidelity_max = 0.9,
-                 phermone_max = 20,
-                 trail_level = 5,
+                 fidelity_min = 0.0,
+                 fidelity_max = 0.999,
+                 phermone_max = 160,
+                 trail_level = 8,
                  turning_kernel = [1,2,3,4,3,2,1]
                  ):
+        """Create the simulation object
+
+        Args:
+            self
+            shape (default (256,256)) is a 2-element tuple that specifies the size of the simulation space
+            phermone_deposit_rate (default 16) is the integer amount of phermones deposited by an ant per time step
+            phermone_evap_rate (default 1) is the integer amount of phermones that evaporate per cell over time
+            fidelity_min: float decimal between 0 and 1, the minimum chance of self.fidelity_test() returning true
+            fidelity_max: float decimal between 0 and 1, the maximum chance of self.fidelity_test() returning true
+            phermone_max: integer, the maximum quantity of phermones that the ant can sense
+            trail_level: integer, the minimum phermone level that the ant will consider to be following a trail
+            turning_kernel: the turning kernel to be used when exploring
+        """
+
+        # Array of phermones is specified by shape
         self.array = np.int_(np.zeros(shape=shape))
-        # self.array = np.random.rand(*shape)
 
         self.phermone_deposit_rate = phermone_deposit_rate
         self.phermone_evap_rate = phermone_evap_rate
@@ -34,9 +40,18 @@ class Simulation:
         self.turning_kernel = turning_kernel
         self.ants = []
 
-    """Run a single step of the simulation, including phermone evaporation and ant steps
-    """
     def step(self):
+        """Run the main logic for the simulation step.
+
+        Adds one ant. Step for each ant. Decreases phermone level by self.phermone_evap_rate.
+
+        Args:
+            self
+        Returns:
+            A np.ndarray, self.array
+        """
+
+        # Make a new ant
         self.ants.append(Ant(self,
                              fidelity_min=self.fidelity_min,
                              fidelity_max=self.fidelity_max,
@@ -44,58 +59,65 @@ class Simulation:
                              trail_level=self.trail_level,
                              turning_kernel=self.turning_kernel
                              ))
-        [a.step_testing() for a in self.ants]
-        # print(self.array)
+        # Step all ants
+        [a.step() for a in self.ants]
 
         # This is a kinda cursed way to decrease the phermone level of the entire space by 1 bottoming out at 0
         stepdown = np.vectorize(lambda x:max(x-1.0,np.random.rand(1)[0]))
         self.array = stepdown(self.array)
         return self.array
 
-    """Deposits an amount of phermone (n or self.phermone_deposit_rate) at the specified location
-    """
-    def deposit_phermone(self, loc, n=None):
-        # print(loc)
-        # print(self.array[*loc])
-        if(n):
-            self.array[*loc] += n
-        else:
-            self.array[*loc] += self.phermone_deposit_rate
-        # print(self.array)
+    def deposit_phermone(self, loc):
+        """Deposits self.phermone_deposit_rate of phermone at the specified location
+
+        Args:
+            self
+            loc: a 2-length iterable, the location to deposit the phermone
+        Returns:
+            integer, the phermone level at the location being added to
+        """
+        self.array[*loc] += self.phermone_deposit_rate
         return self.array[*loc]
 
-    """Removes the specified ant from the simulation
-
-    Ants are removed from the simulation when they wander outside the space
-    """
     def remove_ant(self, ant):
+        """Removes the specified ant from the simulation
+
+        Ants are removed from the simulation when they wander outside the space
+
+        Args:
+            self
+            ant: the ant object to be removed
+        Returns:
+            none, returns value of list.remove()
+        """
         return self.ants.remove(ant)
 
-    """Draw the simulation.
-    """
     def draw(self):
+        """Draw the simulation. Borrowed from Allen Downey
+
+        Args:
+            self
+        Returns:
+            none
+        """
         # Borrowed from Allen
         # https://raw.githubusercontent.com/AllenDowney/ThinkComplexity2/master/notebooks/Cell2D.py
         n, m = self.array.shape
         plt.axis([0, m, 0, n])
-        ctr = np.int_(np.round(np.divide(self.array.shape,2)))
         arr = self.array.copy()
-        # ctr[0] = ctr[0]-1
-        # ctr[1] = ctr[1]+1
-        # arr[*ctr] = np.max(self.array*1.2)
-        # arr[*ctr] = 0
         plt.imshow(arr, interpolation='none', origin='upper',extent=[0, m, 0, n])
-        # plt.show()
 
 
-    """Loop the simulation.
-
-    n (default 10) is the number of times to loop
-    print_iter (default False) is whether to print the array at each loop
-    sleep (default None) is the number of seconds to wait at each loop
-    """
     def loop(self, n = 10, print_iter = False, sleep = None):
-        # return [self.step() for _ in range(n)]
+        """Loop the simulation.
+
+        Args:
+            n (default 10): integer, the number of times to loop
+            print_iter (default False): boolean, whether to print the array at each loop
+            sleep (default None): integer, the number of seconds to wait at each loop
+        Returns:
+            none
+        """
         for _ in range(n):
             if(print_iter):
                 print(self.step())
