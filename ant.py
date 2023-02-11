@@ -1,6 +1,5 @@
 import numpy as np
-from scipy.signal import convolve2d
-import random
+
 class Ant:
     def __init__(self, sim, fidelity_min, fidelity_max, phermone_max, trail_level, turning_kernel):
         """Initialize the ant.
@@ -80,6 +79,7 @@ class Ant:
         get_phermones_per_neighbor(self.get_neighbors())[0][0] will be the location of the highest phermone neighbor (although may be tied with others)
 
         Args:
+            self
             possible_locs: an iterable of 2-length iterables representing each possible location
         Returns:
             a list of 2-length tuples of 2-length location tuples and corresponding phermone levels, sorted with highest level first
@@ -132,8 +132,6 @@ class Ant:
         # Direction is where value is true
         direction = np.where(direction_bools)[0][0]
         return direction
-
-
 
     def move_follow_braden(self):
         """This was created to test my following code, and is me directly coding from the notes in Braden's presentation.
@@ -221,9 +219,6 @@ class Ant:
             else:
                 return self.move_explore()
 
-
-    """Move while exploring (random turn)
-    """
     def move_explore(self):
         """Move according to exploring logic.
 
@@ -255,11 +250,16 @@ class Ant:
         # Move forward
         return self.move_forward()
 
-    """Movement behavior for each step
-
-    Not gonna lie, this is a hot mess that needs more documentation.
-    """
     def step(self):
+        """Perform the overall logic for this ant's step.
+
+        See original paper for details.
+
+        Args:
+            self
+        Returns:
+            A 2-length array, self.location
+        """
         # If we are currently following, do a fidelity test for whether we continue following or decide to explore
         if(self.following):
             if(self.fidelity_test()):
